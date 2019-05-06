@@ -60,6 +60,11 @@ This representation presents a generalisation, permitting *polymorphic update*
 over structures. After lenses are derived, further concepts are introduced, such
 as `Fold`s, `Traversal`s and `Prism`s.
 
+
+### Stacktace Additions
+* You can continually type check by running `ghcid` (inside the nix shell)
+* `hlint` and `hindent` have also been added to `shell.nix`
+* You can run a single file's doctest using `bin/test [filename]`, e.g. `bin/test src/Lets/GetSetLets.hs`. Without any arguments `bin/test` will run all the doctests.
 ----
 
 ### Credits
