@@ -1,39 +1,40 @@
-module Lets.Data (
-  Locality(..)
-, Address(..)
-, Person(..)
-, IntAnd(..)
-, IntOr(..)
-, fredLocality
-, fredAddress
-, fred
-, maryLocality
-, maryAddress
-, mary
-, Store(..)
-, Const (..)
-, Tagged(..)
-, Identity(..)
-, AlongsideLeft(..)
-, AlongsideRight(..)
-) where
+module Lets.Data
+  ( Locality(..)
+  , Address(..)
+  , Person(..)
+  , IntAnd(..)
+  , IntOr(..)
+  , fredLocality
+  , fredAddress
+  , fred
+  , maryLocality
+  , maryAddress
+  , mary
+  , Store(..)
+  , Const(..)
+  , Tagged(..)
+  , Identity(..)
+  , AlongsideLeft(..)
+  , AlongsideRight(..)
+  )
+where
 
-import Control.Applicative(Applicative(..))
-import Data.Monoid(Monoid(..))
+import           Control.Applicative            ( Applicative(..) )
+import           Data.Monoid                    ( Monoid(..) )
 
 data Locality =
   Locality
     String -- city
     String -- state
     String -- country
-  deriving (Eq, Show)  
+  deriving (Eq, Show)
 
 data Address =
   Address
     String -- street
     String -- suburb
     Locality
-  deriving (Eq, Show)  
+  deriving (Eq, Show)
 
 data Person =
   Person
@@ -53,53 +54,23 @@ data IntOr a =
   | IntOrIsNot a
   deriving (Eq, Show)
 
-fredLocality ::
-  Locality
-fredLocality =
-  Locality
-    "Fredmania"
-    "New South Fred"
-    "Fredalia"
+fredLocality :: Locality
+fredLocality = Locality "Fredmania" "New South Fred" "Fredalia"
 
-fredAddress ::
-  Address
-fredAddress =
-  Address
-    "15 Fred St"
-    "Fredville"
-    fredLocality
+fredAddress :: Address
+fredAddress = Address "15 Fred St" "Fredville" fredLocality
 
-fred ::
-  Person
-fred =
-  Person
-    24
-    "Fred"
-    fredAddress
+fred :: Person
+fred = Person 24 "Fred" fredAddress
 
-maryLocality ::
-  Locality
-maryLocality =
-  Locality
-    "Mary Mary"
-    "Western Mary"
-    "Maristan"
+maryLocality :: Locality
+maryLocality = Locality "Mary Mary" "Western Mary" "Maristan"
 
-maryAddress ::
-  Address
-maryAddress =
-  Address
-    "83 Mary Ln"
-    "Maryland"
-    maryLocality
+maryAddress :: Address
+maryAddress = Address "83 Mary Ln" "Maryland" maryLocality
 
-mary ::
-  Person
-mary =
-  Person
-    28
-    "Mary"
-    maryAddress
+mary :: Person
+mary = Person 28 "Mary" maryAddress
 
 ----
 
@@ -110,7 +81,7 @@ data Store s a =
 
 data Const a b =
   Const {
-    getConst :: 
+    getConst ::
       a
   }
   deriving (Eq, Show)
@@ -125,7 +96,7 @@ instance Monoid a => Applicative (Const a) where
   Const f <*> Const a =
     Const (f `mappend` a)
 
-data Tagged a b = 
+data Tagged a b =
   Tagged {
     getTagged ::
       b
@@ -161,7 +132,7 @@ instance Applicative Identity where
 
 data AlongsideLeft f b a =
   AlongsideLeft {
-    getAlongsideLeft :: 
+    getAlongsideLeft ::
       f (a, b)
   }
 
