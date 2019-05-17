@@ -1,5 +1,5 @@
-import Test.DocTest
-import System.Environment
+import           Test.DocTest
+import           System.Environment
 
 main :: IO ()
 main = doctest . getFileFromArgList =<< getArgs
@@ -14,5 +14,5 @@ defaultFiles =
   ]
 
 getFileFromArgList :: [String] -> [String]
-getFileFromArgList [] = defaultFiles
-getFileFromArgList (x:_) = ["-isrc", x]
+getFileFromArgList []      = defaultFiles
+getFileFromArgList (x : _) = ["-isrc", x]
