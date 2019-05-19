@@ -10,6 +10,7 @@ defaultFiles =
   , "src/Lets/GetSetLens.hs"
   , "src/Lets/Lens.hs"
   , "src/Lets/OpticPolyLens.hs"
+  , "src/Lets/OpticPolyLensAlias.hs"
   , "src/Lets/StoreLens.hs"
   ]
 
