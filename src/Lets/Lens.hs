@@ -75,6 +75,8 @@ module Lets.Lens
 where
 
 import           Control.Applicative            ( Applicative((<*>), pure) )
+import qualified Data.Bifunctor                as Bi
+                                                ( first )
 import           Data.Char                      ( toUpper )
 import           Data.Foldable                  ( Foldable(foldMap) )
 import           Data.Functor                   ( (<$>) )
@@ -136,15 +138,15 @@ import           Prelude                 hiding ( product )
 --
 -- /Reminder:/ fmap :: Functor t => (a -> b) -> t a -> t b
 fmapT :: Traversable t => (a -> b) -> t a -> t b
-fmapT = error "todo: fmapT"
+fmapT a2b ta = getIdentity $ traverse (Identity . a2b) ta
 
 -- | Let's refactor out the call to @traverse@ as an argument to @fmapT@.
 over :: ((a -> Identity b) -> s -> Identity t) -> (a -> b) -> s -> t
-over = error "todo: over"
+over t f = getIdentity . t (Identity . f)
 
 -- | Here is @fmapT@ again, passing @traverse@ to @over@.
 fmapTAgain :: Traversable t => (a -> b) -> t a -> t b
-fmapTAgain = error "todo: fmapTAgain"
+fmapTAgain = over traverse
 
 -- | Let's create a type-alias for this type of function.
 type Set s t a b =
@@ -169,15 +171,15 @@ set = error "todo: set"
 --
 -- /Reminder:/ foldMap :: (Foldable t, Monoid b) => (a -> b) -> t a -> b
 foldMapT :: (Traversable t, Monoid b) => (a -> b) -> t a -> b
-foldMapT = error "todo: foldMapT"
+foldMapT a2b = getConst . traverse (Const . a2b)
 
 -- | Let's refactor out the call to @traverse@ as an argument to @foldMapT@.
 foldMapOf :: ((a -> Const r b) -> s -> Const r t) -> (a -> r) -> s -> r
-foldMapOf = error "todo: foldMapOf"
+foldMapOf t a2r = getConst . t (Const . a2r)
 
 -- | Here is @foldMapT@ again, passing @traverse@ to @foldMapOf@.
 foldMapTAgain :: (Traversable t, Monoid b) => (a -> b) -> t a -> b
-foldMapTAgain = error "todo: foldMapTAgain"
+foldMapTAgain = foldMapOf traverse
 
 -- | Let's create a type-alias for this type of function.
 type Fold s t a b =
@@ -218,15 +220,19 @@ type Traversal s t a b =
 
 -- | Traverse both sides of a pair.
 both :: Traversal (a, a) (b, b) a b
-both = error "todo: both"
+both a2fb (a, a') = (,) <$> a2fb a <*> a2fb a'
+-- (a -> f b) -> (a, a) -> f (b, b)
+
 
 -- | Traverse the left side of @Either@.
 traverseLeft :: Traversal (Either a x) (Either b x) a b
-traverseLeft = error "todo: traverseLeft"
+traverseLeft a2fb (Left  a) = Left <$> a2fb a
+traverseLeft _    (Right x) = pure $ Right x
+-- (a -> f b) -> Either a x -> f (Either b x)
 
 -- | Traverse the right side of @Either@.
 traverseRight :: Traversal (Either x a) (Either x b) a b
-traverseRight = error "todo: traverseRight"
+traverseRight = traverse
 
 type Traversal' a b =
   Traversal a a b b
@@ -261,7 +267,7 @@ _Right :: Prism (Either x a) (Either x b) a b
 _Right = error "todo: _Right"
 
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism = error "todo: prism"
+prism to fr = dimap fr (either pure (fmap to)) . right
 
 _Just :: Prism (Maybe a) (Maybe b) a b
 _Just = error "todo: _Just"
