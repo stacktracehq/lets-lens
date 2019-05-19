@@ -113,7 +113,7 @@ instance Applicative (Tagged a) where
   Tagged f <*> Tagged a =
     Tagged (f a)
 
-data Identity a =
+newtype Identity a =
   Identity {
     getIdentity ::
       a
@@ -130,7 +130,7 @@ instance Applicative Identity where
   Identity f <*> Identity a =
     Identity (f a)
 
-data AlongsideLeft f b a =
+newtype AlongsideLeft f b a =
   AlongsideLeft {
     getAlongsideLeft ::
       f (a, b)
@@ -140,7 +140,7 @@ instance Functor f => Functor (AlongsideLeft f b) where
   fmap f (AlongsideLeft x) =
     AlongsideLeft (fmap (\(a, b) -> (f a, b)) x)
 
-data AlongsideRight f a b =
+newtype AlongsideRight f a b =
   AlongsideRight {
     getAlongsideRight ::
       f (a, b)
