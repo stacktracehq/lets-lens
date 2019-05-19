@@ -42,6 +42,7 @@ library
                       Lets.GetSetLens
                       Lets.Lens
                       Lets.OpticPolyLens
+                      Lets.OpticPolyLensAlias
                       Lets.Profunctor
                       Lets.StoreLens
 

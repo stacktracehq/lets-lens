@@ -10,5 +10,7 @@ import           Lets.Lens                     as L
                                                 ( )
 import           Lets.OpticPolyLens            as L
                                                 ( )
+import           Lets.OpticPolyLensAlias       as L
+                                                ( )
 import           Lets.StoreLens                as L
                                                 ( )
