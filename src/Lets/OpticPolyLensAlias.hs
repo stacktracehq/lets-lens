@@ -177,7 +177,7 @@ infixl 5 |=
 --
 -- prop> let types = (x :: Int, y :: String) in setsetLaw fstL (x, y) z
 fstL :: Lens (a, x) (b, x) a b
-fstL = \a2fb (a, x) -> (, x) <$> a2fb a
+fstL a2fb (a, x) = (, x) <$> a2fb a
 
 -- |
 --
@@ -190,7 +190,7 @@ fstL = \a2fb (a, x) -> (, x) <$> a2fb a
 --
 -- prop> let types = (x :: Int, y :: String) in setsetLaw sndL (x, y) z
 sndL :: Lens (x, a) (x, b) a b
-sndL = \a2fb (x, a) -> (x, ) <$> a2fb a
+sndL a2fb (x, a) = (x, ) <$> a2fb a
 
 -- |
 --
@@ -212,11 +212,9 @@ sndL = \a2fb (x, a) -> (x, ) <$> a2fb a
 -- >>> set (mapL 33) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d'])) Nothing
 -- fromList [(1,'a'),(2,'b'),(3,'c'),(4,'d')]
 mapL :: Ord k => k -> Lens (Map k v) (Map k v) (Maybe v) (Maybe v)
-mapL k = r
+mapL k mv2fmv kvMap = insertOrDelete <$> mv2fmv (Map.lookup k kvMap)
  where
-  r mv2fmv kvMap = insertOrDelete kvMap <$> mv2fmv (Map.lookup k kvMap)
-  insertOrDelete kvMap =
-    maybe (Map.delete k kvMap) (\v -> Map.insert k v kvMap)
+  insertOrDelete = maybe (Map.delete k kvMap) (\v -> Map.insert k v kvMap)
 
 -- |
 --
@@ -238,10 +236,8 @@ mapL k = r
 -- >>> set (setL 33) (Set.fromList [1..5]) False
 -- fromList [1,2,3,4,5]
 setL :: Ord k => k -> Lens (Set k) (Set k) Bool Bool
-setL k = r
- where
-  r bool2fbool kSet = insertOrDelete kSet <$> bool2fbool (Set.member k kSet)
-  insertOrDelete kSet b = if b then Set.insert k kSet else Set.delete k kSet
+setL k bool2fbool kSet = insertOrDelete <$> bool2fbool (Set.member k kSet)
+  where insertOrDelete b = if b then Set.insert k kSet else Set.delete k kSet
 
 -- |
 --
@@ -276,14 +272,13 @@ identity = id
 -- >>> set (product fstL sndL) (("abc", 3), (4, "def")) ("ghi", "jkl")
 -- (("ghi",3),(4,"jkl"))
 product :: Lens s t a b -> Lens q r c d -> Lens (s, q) (t, r) (a, c) (b, d)
-product l l' = \ac2fbd (s, q) -> getAlongsideLeft (runLeft ac2fbd s q)
+product l l' ac2fbd (s, q) = getAlongsideLeft runLeft
  where
-  runLeft ac2fbd s q =
-    l (\a -> AlongsideLeft (getAlongsideRight (runRight ac2fbd a q))) s
-  runRight ac2fbd a = l' (\c -> AlongsideRight (ac2fbd (a, c)))
+  runLeft = l (AlongsideLeft . getAlongsideRight . runRight) s
+  runRight a = l' (AlongsideRight . ac2fbd . (a, )) q
 
 product' :: Lens s t a b -> Lens q r c d -> Lens (s, q) (t, r) (a, c) (b, d)
-product' l l' = \ac2fbd (s, q) ->
+product' l l' ac2fbd (s, q) =
   (\(b, d) -> (set l s b, set l' q d)) <$> ac2fbd (get l s, get l' q)
 -- (a -> f b) -> s -> f t
 -- (c -> f d) -> q -> f r
@@ -333,38 +328,38 @@ type Lens' a b =
   Lens a a b b
 
 cityL :: Lens' Locality String
-cityL = (\p (Locality c t y) -> fmap (\c' -> Locality c' t y) (p c))
+cityL p (Locality c t y) = fmap (\c' -> Locality c' t y) (p c)
 
 stateL :: Lens' Locality String
-stateL = (\p (Locality c t y) -> fmap (\t' -> Locality c t' y) (p t))
+stateL p (Locality c t y) = fmap (\t' -> Locality c t' y) (p t)
 
 countryL :: Lens' Locality String
-countryL = (\p (Locality c t y) -> fmap (Locality c t) (p y))
+countryL p (Locality c t y) = fmap (Locality c t) (p y)
 
 streetL :: Lens' Address String
-streetL = (\p (Address t s l) -> fmap (\t' -> Address t' s l) (p t))
+streetL p (Address t s l) = fmap (\t' -> Address t' s l) (p t)
 
 suburbL :: Lens' Address String
-suburbL = (\p (Address t s l) -> fmap (\s' -> Address t s' l) (p s))
+suburbL p (Address t s l) = fmap (\s' -> Address t s' l) (p s)
 
 localityL :: Lens' Address Locality
-localityL = (\p (Address t s l) -> fmap (Address t s) (p l))
+localityL p (Address t s l) = fmap (Address t s) (p l)
 
 ageL :: Lens' Person Int
-ageL = (\p (Person a n d) -> fmap (\a' -> Person a' n d) (p a))
+ageL p (Person a n d) = fmap (\a' -> Person a' n d) (p a)
 
 nameL :: Lens' Person String
-nameL = (\p (Person a n d) -> fmap (\n' -> Person a n' d) (p n))
+nameL p (Person a n d) = fmap (\n' -> Person a n' d) (p n)
 
 addressL :: Lens' Person Address
-addressL = (\p (Person a n d) -> fmap (Person a n) (p d))
+addressL p (Person a n d) = fmap (Person a n) (p d)
 
 intAndIntL :: Lens' (IntAnd a) Int
-intAndIntL = (\p (IntAnd n a) -> fmap (`IntAnd` a) (p n))
+intAndIntL p (IntAnd n a) = fmap (`IntAnd` a) (p n)
 
 -- lens for polymorphic update
 intAndL :: Lens (IntAnd a) (IntAnd b) a b
-intAndL = (\p (IntAnd n a) -> fmap (IntAnd n) (p a))
+intAndL p (IntAnd n a) = fmap (IntAnd n) (p a)
 
 -- |
 --
@@ -416,7 +411,7 @@ setCityAndLocality = set $ addressL . localityL . cityL *** localityL
 -- >>> getSuburbOrCity (Right fredLocality)
 -- "Fredmania"
 getSuburbOrCity :: Either Address Locality -> String
-getSuburbOrCity = get (suburbL ||| cityL)
+getSuburbOrCity = get $ suburbL ||| cityL
 
 -- |
 --
@@ -426,7 +421,7 @@ getSuburbOrCity = get (suburbL ||| cityL)
 -- >>> setStreetOrState (Left fred) "Some Other St"
 -- Left (Person 24 "Fred" (Address "Some Other St" "Fredville" (Locality "Fredmania" "New South Fred" "Fredalia")))
 setStreetOrState :: Either Person Locality -> String -> Either Person Locality
-setStreetOrState = set (addressL . streetL ||| stateL)
+setStreetOrState = set $ addressL . streetL ||| stateL
 
 -- |
 --
