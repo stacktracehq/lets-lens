@@ -79,7 +79,7 @@ data Store s a =
     (s -> a)
     s
 
-data Const a b =
+newtype Const a b =
   Const {
     getConst ::
       a
@@ -96,7 +96,7 @@ instance Monoid a => Applicative (Const a) where
   Const f <*> Const a =
     Const (f `mappend` a)
 
-data Tagged a b =
+newtype Tagged a b =
   Tagged {
     getTagged ::
       b

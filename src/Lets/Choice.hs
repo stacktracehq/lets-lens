@@ -8,7 +8,7 @@ import           Lets.Profunctor
 
 diswap
   :: Profunctor p => p (Either a b) (Either c d) -> p (Either b a) (Either d c)
-diswap = let swap = either Right Left in dimap swap swap
+diswap = dimap swap swap where swap = either Right Left
 
 -- | Map on left or right of @Either@. Only one of @left@ or @right@ needs to be
 -- provided.
@@ -28,8 +28,7 @@ class Profunctor p => Choice p where
 instance Choice (->) where
   left f =
     either (Left . f) Right
-  right f =
-    either Left (Right . f)
+  right = fmap
 
 instance Choice Tagged where
   left (Tagged x) =
