@@ -15,7 +15,7 @@ class Profunctor p where
     -> p b d
 
 instance Profunctor (->) where
-  dimap f g = \h -> g . h . f
+  dimap f g h = g . h . f
 
 instance Profunctor Tagged where
   dimap _ g (Tagged x) =
