@@ -1,3 +1,5 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module Lets.Choice
   ( Choice(..)
   )
@@ -5,6 +7,7 @@ where
 
 import           Lets.Data
 import           Lets.Profunctor
+import           Data.Bifunctor                as BF
 
 diswap
   :: Profunctor p => p (Either a b) (Either c d) -> p (Either b a) (Either d c)
@@ -26,13 +29,14 @@ class Profunctor p => Choice p where
     diswap . left
 
 instance Choice (->) where
-  left f =
-    either (Left . f) Right
-  right = fmap
+  left :: (a -> b) -> (Either a c -> Either b c)
+  left = BF.first
+  right :: (a -> b) -> (Either c a -> Either c b)
+  right = BF.second
 
 instance Choice Tagged where
-  left (Tagged x) =
-    Tagged (Left x)
-  right (Tagged x) =
-    Tagged (Right x)
+  left :: Tagged a b -> Tagged (Either a c) (Either b c)
+  left (Tagged b) = Tagged (Left b)
+  right :: Tagged a b -> Tagged (Either c a) (Either c b)
+  right (Tagged b) = Tagged (Right b)
 
